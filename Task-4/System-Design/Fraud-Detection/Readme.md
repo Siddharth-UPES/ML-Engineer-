@@ -1,4 +1,3 @@
-📄 README.md (FINAL – COPY PASTE)
 # Banknote Authentication Scanner – ML System Design
 
 ## Overview
