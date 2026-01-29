@@ -1,34 +1,45 @@
 import streamlit as st
 import numpy as np
+import cv2
 import joblib
-import os
+from scipy.stats import skew, kurtosis
 
-# Safe base directory (local + cloud dono ke liye)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Load model & scaler
+model = joblib.load("model/classifier.pkl")
+scaler = joblib.load("model/feature_scaler.pkl")
 
-model_path = os.path.join(BASE_DIR, "model", "classifier.pkl")
-scaler_path = os.path.join(BASE_DIR, "model", "feature_scaler.pkl")
+st.set_page_config(page_title="Banknote Scanner", layout="centered")
 
-model = joblib.load(model_path)
-scaler = joblib.load(scaler_path)
+st.title("💵 Banknote Authentication Scanner")
+st.write("Upload a banknote image to detect whether it is **Genuine** or **Fake**")
 
-st.set_page_config(page_title="Banknote Fraud Detector", layout="centered")
+uploaded_file = st.file_uploader("📤 Upload Banknote Image", type=["jpg", "png", "jpeg"])
 
-st.title("💵 Banknote Authentication System")
-st.write("Detect whether a banknote is **Genuine or Fake**")
+def extract_features(image):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray = gray.astype(np.float64)
 
-variance = st.number_input("Variance", value=0.0)
-skewness = st.number_input("Skewness", value=0.0)
-kurtosis = st.number_input("Kurtosis", value=0.0)
-entropy = st.number_input("Entropy", value=0.0)
+    variance = gray.var()
+    skewness = skew(gray.flatten())
+    kurt = kurtosis(gray.flatten())
+    entropy = -np.sum(
+        (gray/255) * np.log2((gray/255) + 1e-10)
+    )
 
-if st.button("Analyze"):
-    X = np.array([[variance, skewness, kurtosis, entropy]])
-    X_scaled = scaler.transform(X)
+    return np.array([[variance, skewness, kurt, entropy]])
 
-    prob = model.predict_proba(X_scaled)[0][1]
+if uploaded_file is not None:
+    image = cv2.imdecode(np.frombuffer(uploaded_file.read(), np.uint8), 1)
+    st.image(image, caption="Uploaded Banknote", use_column_width=True)
 
-    if prob > 0.4:
-        st.error(f"🚨 Fake Banknote Detected (Confidence: {prob:.2f})")
+    features = extract_features(image)
+    features_scaled = scaler.transform(features)
+
+    prediction = model.predict(features_scaled)[0]
+
+    st.subheader("🔍 Scan Result")
+
+    if prediction == 0:
+        st.success("✅ Genuine Banknote")
     else:
-        st.success(f"✅ Genuine Banknote (Confidence: {1-prob:.2f})")
+        st.error("❌ Fake Banknote")
