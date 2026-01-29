@@ -4,3 +4,4 @@ scikit-learn
 joblib
 scipy
 opencv-python-headless
+joblib.load
