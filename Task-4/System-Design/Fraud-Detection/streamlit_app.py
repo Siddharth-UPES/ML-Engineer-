@@ -1,30 +1,39 @@
 import streamlit as st
 import numpy as np
-import cv2
 import joblib
+import cv2
+import os
 from scipy.stats import skew, kurtosis
 
-# Load model & scaler
-model = joblib.load("model/classifier.pkl")
-scaler = joblib.load("model/feature_scaler.pkl")
+# ==============================
+# SAFE PATH HANDLING (IMPORTANT)
+# ==============================
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+model_path = os.path.join(BASE_DIR, "model", "classifier.pkl")
+scaler_path = os.path.join(BASE_DIR, "model", "feature_scaler.pkl")
+
+model = joblib.load(model_path)
+scaler = joblib.load(scaler_path)
+
+# ==============================
+# STREAMLIT UI
+# ==============================
 st.set_page_config(page_title="Banknote Scanner", layout="centered")
 
 st.title("💵 Banknote Authentication Scanner")
-st.write("Upload a banknote image to detect whether it is **Genuine** or **Fake**")
+st.write("Upload a banknote image to check whether it is **Genuine or Fake**.")
 
-uploaded_file = st.file_uploader("📤 Upload Banknote Image", type=["jpg", "png", "jpeg"])
+uploaded_file = st.file_uploader("Upload Banknote Image", type=["jpg", "jpeg", "png"])
 
 def extract_features(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    gray = gray.astype(np.float64)
+    gray = gray.astype(float)
 
     variance = gray.var()
     skewness = skew(gray.flatten())
     kurt = kurtosis(gray.flatten())
-    entropy = -np.sum(
-        (gray/255) * np.log2((gray/255) + 1e-10)
-    )
+    entropy = -np.sum((gray/255) * np.log2((gray/255) + 1e-10))
 
     return np.array([[variance, skewness, kurt, entropy]])
 
@@ -37,9 +46,9 @@ if uploaded_file is not None:
 
     prediction = model.predict(features_scaled)[0]
 
-    st.subheader("🔍 Scan Result")
+    st.subheader("Scan Result")
 
-    if prediction == 0:
-        st.success("✅ Genuine Banknote")
+    if prediction == 1:
+        st.error("❌ Fake Banknote Detected")
     else:
-        st.error("❌ Fake Banknote")
+        st.success("✅ Genuine Banknote")
