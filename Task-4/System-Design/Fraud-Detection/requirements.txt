@@ -1,4 +1,6 @@
+streamlit
 numpy
+opencv-python
+scipy
 scikit-learn
 joblib
-streamlit
