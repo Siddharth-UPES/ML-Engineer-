@@ -50,16 +50,7 @@ These features are widely used in traditional banknote authentication systems.
 
 ---
 
-## Deployment
-- Application built using Streamlit  
-- Deployed on Streamlit Cloud  
-- Supports real-time image-based fraud detection  
 
-### Live Project Link
-Streamlit App:  
-https://gjvnxpbfauwzwafbx8grck.streamlit.app/
-
----
 
 ## Monitoring and Retraining Strategy
 - Monitor incoming feature distributions from uploaded images  
@@ -82,3 +73,17 @@ https://gjvnxpbfauwzwafbx8grck.streamlit.app/
 ## Conclusion
 This project demonstrates a production-style ML system, integrating image preprocessing, feature engineering, model inference, deployment, and monitoring.  
 It closely mirrors real-world financial fraud detection scanners, emphasizing reliability, interpretability, and scalability.
+
+
+## Deployment & Live Demo
+- Application built using Streamlit  
+- Deployed on Streamlit Cloud  
+- Supports real-time image-based fraud detection  
+
+- **Live Demo:** [Streamlit Cloud Link](https://gjvnxpbfauwzwafbx8grck.streamlit.app/)  
+- **Local Run Instructions:**
+```bash
+git clone <repo-url>
+cd task4
+pip install -r requirements.txt
+streamlit run app.py
